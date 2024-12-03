@@ -61,21 +61,35 @@ elif selected_section == "Price Trends":
                                             high=coin_data.iloc[0]['market_cap'] * 1.1, size=10)
         })
 
-        # Line Chart
-        fig, ax = plt.subplots()
-        ax.plot(trend_data['Timestamp'], trend_data['Price'], label='Price', marker='o')
-        ax.set_title(f"Price Trend for {selected_coin}")
-        ax.set_xlabel("Date")
-        ax.set_ylabel("Price (USD)")
-        ax.legend()
+        
+        fig, ax = plt.subplots(figsize=(10, 6))
+        ax.plot(
+            trend_data['Timestamp'], 
+            trend_data['Price'], 
+            label='Price', 
+            marker='o', 
+            markersize=5
+        )
+        ax.set_title(f"Price Trend for {selected_coin}", fontsize=14)
+        ax.set_xlabel("Date", fontsize=12)
+        ax.set_ylabel("Price (USD)", fontsize=12)
+        ax.tick_params(axis='both', which='major', labelsize=10)
+        ax.legend(fontsize=10)
+        fig.tight_layout()
         st.pyplot(fig)
 
-        # Area Chart
-        fig, ax = plt.subplots()
-        ax.fill_between(trend_data['Timestamp'], trend_data['Market Cap'], color='skyblue', alpha=0.5)
-        ax.set_title(f"Market Cap Trend for {selected_coin}")
-        ax.set_xlabel("Date")
-        ax.set_ylabel("Market Cap (USD)")
+        fig, ax = plt.subplots(figsize=(10, 6))
+        ax.fill_between(
+            trend_data['Timestamp'], 
+            trend_data['Market Cap'], 
+            color='skyblue', 
+            alpha=0.5
+        )
+        ax.set_title(f"Market Cap Trend for {selected_coin}", fontsize=14)
+        ax.set_xlabel("Date", fontsize=12) 
+        ax.set_ylabel("Market Cap (USD)", fontsize=12)
+        ax.tick_params(axis='both', which='major', labelsize=10) 
+        fig.tight_layout()
         st.pyplot(fig)
     else:
         st.warning("No data available for the selected cryptocurrency.")
