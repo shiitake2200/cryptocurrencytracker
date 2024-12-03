@@ -14,22 +14,21 @@ def fetch_data():
         st.error("Failed to fetch data from CoinGecko API")
         return pd.DataFrame()
 
-# App Title and Description
+#Info and title
 st.title("Cryptocurrency Tracker")
 st.info("Track real-time cryptocurrency prices, trends, and market insights.")
 
-# Sidebar Navigation
+# sidebar
 st.sidebar.header("Navigation")
 selected_section = st.sidebar.radio("Go to:", ["Overview", "Price Trends", "Global Crypto Exchange Map"])
 
-# Fetch data
 crypto_data = fetch_data()
 
-# Section 1: Overview
+#Overview
 if selected_section == "Overview":
     st.subheader("Cryptocurrency Overview")
 
-    # Interactive Table
+    #Table
     search_coin = st.text_input("Search for a cryptocurrency:", "")
     if search_coin:
         filtered_data = crypto_data[crypto_data['name'].str.contains(search_coin, case=False)]
@@ -38,21 +37,21 @@ if selected_section == "Overview":
 
     st.dataframe(filtered_data[['name', 'symbol', 'current_price', 'market_cap', 'total_volume']])
 
-    # Button Widget
+    #refresh button
     if st.button("Refresh Data"):
         crypto_data = fetch_data()
         st.success("Data refreshed successfully!")
 
-# Section 2: Price Trends
+#Price Trends
 elif selected_section == "Price Trends":
     st.subheader("Price Trends")
 
-    # Selectbox for Cryptocurrency
+    #Selectbox
     selected_coin = st.selectbox("Choose a cryptocurrency:", crypto_data['name'])
     coin_data = crypto_data[crypto_data['name'] == selected_coin]
 
     if not coin_data.empty:
-        # Simulated data for historical trends
+        #Data
         trend_data = pd.DataFrame({
             'Timestamp': pd.date_range(start='2023-12-01', periods=10, freq='D'),
             'Price': np.random.uniform(low=coin_data.iloc[0]['current_price'] * 0.9,
@@ -94,11 +93,11 @@ elif selected_section == "Price Trends":
     else:
         st.warning("No data available for the selected cryptocurrency.")
 
-# Section 3: Global Crypto Exchange Map
+#Global Crypto Exchange Map
 elif selected_section == "Global Crypto Exchange Map":
     st.subheader("Global Crypto Exchange Map")
 
-    # Fetch exchange data from CoinGecko
+    #CoinGecko
     @st.cache_data
     def fetch_exchanges():
         url = "https://api.coingecko.com/api/v3/exchanges"
@@ -109,12 +108,10 @@ elif selected_section == "Global Crypto Exchange Map":
             st.error("Failed to fetch exchange data from CoinGecko.")
             return pd.DataFrame()
 
-    # Get exchange data
     exchanges = fetch_exchanges()
 
-    # Prepare map data
+    #map
     if not exchanges.empty:
-        # Example country centroids for simplicity (use a geocoding API for precise lat/lon)
         country_coordinates = {
     "Cayman Islands": {"lat": 19.3133, "lon": -81.2546},
     "British Virgin Islands": {"lat": 18.4207, "lon": -64.6399},
@@ -133,7 +130,7 @@ elif selected_section == "Global Crypto Exchange Map":
                 coords = country_coordinates[country]
                 map_data.append({"lat": coords["lat"], "lon": coords["lon"], "name": row["name"]})
 
-        # Convert to DataFrame for Streamlit map
+        #converting
         if map_data:
             map_df = pd.DataFrame(map_data)
             st.map(map_df[["lat", "lon"]])
@@ -143,10 +140,9 @@ elif selected_section == "Global Crypto Exchange Map":
     else:
         st.warning("No exchange data available.")
 
-    # Checkbox for detailed exchange data
+    #checkbox
     if st.checkbox("Show List of Best Global Exchangers"):
         st.write(exchanges[["name", "country", "year_established", "trust_score_rank"]])
 
-# Widgets and Feedback Boxes
 st.sidebar.success("App loaded successfully!")
 st.sidebar.warning("Data may be outdated if not refreshed.")
