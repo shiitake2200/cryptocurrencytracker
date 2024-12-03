@@ -20,7 +20,7 @@ st.info("Track real-time cryptocurrency prices, trends, and market insights.")
 
 # Sidebar Navigation
 st.sidebar.header("Navigation")
-selected_section = st.sidebar.radio("Go to:", ["Overview", "Price Trends", "Global Market"])
+selected_section = st.sidebar.radio("Go to:", ["Overview", "Price Trends", "Global Crypto Exchange Map"])
 
 # Fetch data
 crypto_data = fetch_data()
@@ -80,20 +80,58 @@ elif selected_section == "Price Trends":
     else:
         st.warning("No data available for the selected cryptocurrency.")
 
-# Section 3: Global Market
-elif selected_section == "Global Market":
-    st.subheader("Global Market Insights")
+# Section 3: Global Crypto Exchange Map
+elif selected_section == "Global Crypto Exchange Map":
+    st.subheader("Global Crypto Exchange Map")
 
-    # Map with random data
-    map_data = pd.DataFrame({
-        'lat': np.random.uniform(-90, 90, 10),
-        'lon': np.random.uniform(-180, 180, 10)
-    })
-    st.map(map_data)
+    # Fetch exchange data from CoinGecko
+    @st.cache_data
+    def fetch_exchanges():
+        url = "https://api.coingecko.com/api/v3/exchanges"
+        response = requests.get(url)
+        if response.status_code == 200:
+            return pd.DataFrame(response.json())
+        else:
+            st.error("Failed to fetch exchange data from CoinGecko.")
+            return pd.DataFrame()
 
-    # Checkbox
-    if st.checkbox("Show Market Details"):
-        st.write(crypto_data.describe())
+    # Get exchange data
+    exchanges = fetch_exchanges()
+
+    # Prepare map data
+    if not exchanges.empty:
+        # Example country centroids for simplicity (use a geocoding API for precise lat/lon)
+        country_coordinates = {
+    "Cayman Islands": {"lat": 19.3133, "lon": -81.2546},
+    "British Virgin Islands": {"lat": 18.4207, "lon": -64.6399},
+    "United States": {"lat": 37.0902, "lon": -95.7129},
+    "Seychelles": {"lat": -4.6796, "lon": 55.4920},
+    "Hong Kong": {"lat": 22.3193, "lon": 114.1694},
+    "Bermuda": {"lat": 32.3078, "lon": -64.7505},
+    "Panama": {"lat": 8.5380, "lon": -80.7821}
+}
+
+
+        map_data = []
+        for _, row in exchanges.iterrows():
+            country = row.get("country")
+            if country and country in country_coordinates:
+                coords = country_coordinates[country]
+                map_data.append({"lat": coords["lat"], "lon": coords["lon"], "name": row["name"]})
+
+        # Convert to DataFrame for Streamlit map
+        if map_data:
+            map_df = pd.DataFrame(map_data)
+            st.map(map_df[["lat", "lon"]])
+            #st.write(map_df)
+        else:
+            st.warning("No valid location data available for exchanges.")
+    else:
+        st.warning("No exchange data available.")
+
+    # Checkbox for detailed exchange data
+    if st.checkbox("Show List of Best Global Exchangers"):
+        st.write(exchanges[["name", "country", "year_established", "trust_score_rank"]])
 
 # Widgets and Feedback Boxes
 st.sidebar.success("App loaded successfully!")
